@@ -1,0 +1,36 @@
+{
+  "name": "mqtt-emitter",
+  "version": "0.0.0",
+  "description": "Emit MQTT events to listeners using mqtt-regex for routing",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify index.js --standalone MQTTEmitter > build/MQTTEmitter.js",
+    "build-min": "browserify index.js --standalone MQTTEmitter | uglifyjs - > build/MQTTEmitter.min.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RangerMauve/mqtt-emitter.git"
+  },
+  "keywords": [
+    "mqtt",
+    "regex",
+    "events",
+    "emitter",
+    "router"
+  ],
+  "author": "RangerMauve",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RangerMauve/mqtt-emitter/issues"
+  },
+  "homepage": "https://github.com/RangerMauve/mqtt-emitter",
+  "devDependencies": {
+    "browserify": "^5.11.1",
+    "uglify-js": "^2.4.15"
+  },
+  "dependencies": {
+    "mqtt-regex": "^0.1.1",
+    "pattern-emitter": "^1.0.0"
+  }
+}
