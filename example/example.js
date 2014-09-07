@@ -1,4 +1,4 @@
-var MQTTEmitter = require("../").MQTTEmitter;
+var MQTTEmitter = require("../");
 
 var events = new MQTTEmitter();
 
