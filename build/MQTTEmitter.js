@@ -8,7 +8,7 @@ var mqtt_regex = require("mqtt-regex");
 var regex_on = RegexEmitter.prototype.on;
 var regex_off = RegexEmitter.prototype.removeListener;
 
-exports.MQTTEmitter = MQTTEmitter;
+module.exports = MQTTEmitter;
 
 function MQTTEmitter() {
 	RegexEmitter.call(this);

@@ -1,6 +1,6 @@
 {
   "name": "mqtt-emitter",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Emit MQTT events to listeners using mqtt-regex for routing",
   "main": "index.js",
   "scripts": {
