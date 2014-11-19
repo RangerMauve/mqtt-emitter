@@ -1,5 +1,5 @@
 /*
- mqtt-emitter by RangerMauve. Version 0.0.0
+ mqtt-emitter by RangerMauve. Version 0.0.2
 */
 
 var RegexEmitter = require("pattern-emitter");
@@ -18,7 +18,8 @@ MQTTEmitter.prototype = Object.create(RegexEmitter.prototype);
 
 MQTTEmitter.prototype.on = function(topic, handler) {
 	var matcher = mqtt_regex(topic);
-	this._handler_map.push([_handler, handler, topic]);
+	handler._handler = _handler;
+
 	return regex_on.call(this, matcher.regex, _handler);
 
 	function _handler(payload) {
@@ -31,10 +32,6 @@ MQTTEmitter.prototype.on = function(topic, handler) {
 MQTTEmitter.prototype.addListener = MQTTEmitter.prototype.on;
 
 MQTTEmitter.prototype.removeListener = function(topic, handler) {
-	var handler_index = -1;
-	if (!this._handler_map.some(function(pair, index) {
-		if (pair[1] == handler) return (handler_index = index);
-	})) return;
-	var _handler = this._handler_map.splice(handler_index, 1)[0][0];
+	var _handler = hander._handler;
 	return regex_off.call(this, topic, _handler);
 }
