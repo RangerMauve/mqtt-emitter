@@ -9,7 +9,7 @@ Example
 -------
 Here's an example of how you can use the library to handle traffic from a hypothetical chat based on MQTT.
 ``` javascript
-var MQTTEmitter = require("../");
+var MQTTEmitter = require("mqtt-emitter");
 
 var events = new MQTTEmitter();
 
