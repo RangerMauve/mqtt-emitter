@@ -60,3 +60,15 @@ emitter.on(topic_pattern,callback)
 `topic_pattern` is a MQTT topic with optional named wildcards which get parsed out. See [mqtt-regex](https://github.com/RangerMauve/mqtt-regex#how-params-work) for how the patterns work.
 
 `callback` takes two arguments, one which is the payload of the event, and the second which is an object containing the parsed out parameters from the topic pattern.
+
+There are also hooks that you can listen for new and removed topic listeners.
+
+``` javascript
+// Override the default behavior with a custom callback for subscribing to topics
+emitter.onadd = function (topic) {
+	mqtt.subscribe("topic");
+}
+emitter.onremove = function (topic) {
+	mqtt.unsubscribe("topic");
+}
+```
