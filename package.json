@@ -30,7 +30,6 @@
     "uglify-js": "^2.4.15"
   },
   "dependencies": {
-    "mqtt-regex": "^1.0.0",
-    "pattern-emitter": "^1.0.0"
+    "mqtt-regex": "^1.0.0"
   }
 }
