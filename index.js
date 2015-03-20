@@ -132,6 +132,19 @@ function removeListener(topic, handler) {
  * @return {MQTTEmitter}       Returns self for use in chaining
  */
 function removeAllListeners(topic) {
+	if (!topic) {
+		var all_listeners = this._listeners;
+
+		this._listeners = {};
+		this._regexes = [];
+
+		Object.keys(all_listeners).forEach(function(topic) {
+			this.onremove(topic);
+		}, this);
+
+		return this;
+	}
+
 	var matcher = mqtt_regex(topic);
 
 	var topic_string = matcher.topic;
@@ -141,7 +154,7 @@ function removeAllListeners(topic) {
 	if (!listeners)
 		return this;
 
-	this._listeners = undefined;
+	this._listeners[topic_string] = undefined;
 	this._regexes.filter(function(regex) {
 		return (regex.topic !== topic_string);
 	});
@@ -185,10 +198,15 @@ function emit(topic, payload) {
 
 	function process_regex(regex) {
 		var matches = topic.match(regex.regex);
-		if (!matches) return;
-		has_matched = true;
 		var topic_string = regex.topic;
+
+		if (!matches) return;
+
 		var listeners = _listeners[topic_string] || [];
+		if (!listeners.length) return;
+
+		has_matched = true;
+
 		listeners.forEach(handle_listener.bind(null, matches));
 	}
 
