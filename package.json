@@ -4,7 +4,7 @@
   "description": "Emit MQTT events to listeners using mqtt-regex for routing",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node_modules/.bin/mocha",
     "build": "browserify index.js --standalone MQTTEmitter > build/MQTTEmitter.js",
     "build-min": "browserify index.js --standalone MQTTEmitter | uglifyjs - > build/MQTTEmitter.min.js"
   },
@@ -27,6 +27,9 @@
   "homepage": "https://github.com/RangerMauve/mqtt-emitter",
   "devDependencies": {
     "browserify": "^5.11.1",
+    "chai": "^2.1.2",
+    "mocha": "^2.2.1",
+    "node-noop": "0.0.1",
     "uglify-js": "^2.4.15"
   },
   "dependencies": {
