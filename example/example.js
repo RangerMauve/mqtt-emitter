@@ -11,7 +11,7 @@ var delay = 200;
 events.on(topic, handle_message);
 say_something();
 
-function handle_message(data, params) {
+function handle_message(data, params, topic, topic_pattern) {
 	var name = params.name;
 	var path = params.path;
 	console.log(name, "@", "/" + path.join("/"), ":", data);
