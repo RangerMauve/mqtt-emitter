@@ -1,7 +1,7 @@
 mqtt-emitter
 ============
 
-This is a library for easily routing MQTT traffic in JavaScript. The API is the same as EventEmitter, but it automatically routes your topics behind the scenes. This library is based on [pattern-emitter](https://github.com/danielstjules/pattern-emitter) and [mqtt-regex](https://github.com/RangerMauve/mqtt-regex) and can be used in Node, Browserify, or as a drop in JS file for the browser.
+This is a library for easily routing MQTT traffic in JavaScript. The API is the same as EventEmitter, but it automatically routes your topics behind the scenes. The parsing of topic patterns is done by [mqtt-regex](https://github.com/RangerMauve/mqtt-regex). This library can be used in Node, Browserify, or as a drop in JS file for the browser.
 
 A goal of this library is to leave the actual MQTT transport up to the user so that they can use whatever MQTT connection they want for the actual transport, and just relay all incoming messages to this library for routing. Take a look at [MQTT.js](https://github.com/adamvr/MQTT.js) for node and [Mows](https://github.com/mcollina/mows) for the browser.
 
@@ -40,26 +40,32 @@ Installing & Usage
 ------------------
 In node or browserify install with
   $ npm install --save mqtt-emitter
+
 And then use it with
 ``` javascript
 var MQTTEmitter = require("mqtt-emitter");
 var events = new MQTTEmitter();
 ```
-If you aren't using browserify (for some crazy reason), then you can get a pre-bundled version from the build folder of the repository. The bundle is UMD compatible and supports UMD, CommonJS and creates a global called MQTTEmitter if neither of those are present.  Just dump the file in your HTML and you can use it with
+If you aren't using [Browserify](http://browserify.org/) (for some crazy reason), then you can build a bundle with `npm run build` or `npm run build-min`. The bundle is UMD compatible and supports UMD, CommonJS and creates a global called MQTTEmitter if neither of those are present.  Just dump the file in your HTML and you can use it with
+
 ``` javascript
 var events = new MQTTEmitter();
 ```
 
 API
 ---
-The API is the same as EventEmitter (but also has some things from pattern-emitter) except that the `on()` method has custom functionality.
+The API is the same as [EventEmitter](https://nodejs.org/api/events.html) except that  `on()`, and `emit()` have custom functionality.
 ``` javascript
 emitter.on(topic_pattern,callback)
 ```
 
 `topic_pattern` is a MQTT topic with optional named wildcards which get parsed out. See [mqtt-regex](https://github.com/RangerMauve/mqtt-regex#how-params-work) for how the patterns work.
 
-`callback` takes two arguments, one which is the payload of the event, and the second which is an object containing the parsed out parameters from the topic pattern.
+`callback` takes four arguments:
+ - `payload` : The payload that was passed in with `emit()`
+ - `params` : The parameters parsed out using the topic pattern from the topic. See [mqtt-regex](https://github.com/RangerMauve/mqtt-regex#how-params-work) for details
+ - `topic` : The topic that was emitted with `emit()`
+ - `topic_pattern` : The topic pattern that was used when this listener was registered
 
 There are also hooks that you can listen for new and removed topic listeners.
 
@@ -72,3 +78,7 @@ emitter.onremove = function (topic) {
 	mqtt.unsubscribe("topic");
 }
 ```
+
+*Note:* Topic patterns are converted into their regular MQTT counterparts so `foo/+boar/#` is the same as `foo/+baz/#`. They both turn into `foo/+/#`
+
+*Note:* Because of the nature of this library, the `newListener` and `removeListener` events aren't supported. Use the `onadd()` and `onremove()` hooks instead.
