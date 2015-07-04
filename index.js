@@ -3,6 +3,7 @@
 */
 
 var mqtt_regex = require("mqtt-regex");
+var MQTTStore = require("mqtt-store");
 
 module.exports = MQTTEmitter;
 
@@ -10,7 +11,7 @@ module.exports = MQTTEmitter;
  * Creates a new MQTTEmitter instance
  */
 function MQTTEmitter() {
-	this._listeners = {};
+	this._listeners = new MQTTStore();
 	this._regexes = [];
 }
 
@@ -35,33 +36,7 @@ MQTTEmitter.prototype = Object.create({
  * @return {MQTTEmitter}         Returns self for use in chaining
  */
 function addListener(topic, handler) {
-	// Create the matcher with mqtt-regex
-	var matcher = mqtt_regex(topic);
 
-	var topic_string = matcher.topic;
-
-	var listeners = this._listeners[topic_string];
-
-	var is_new = !listeners;
-
-	if (is_new) {
-		listeners = this._listeners[topic_string] = [];
-		this._regexes.push({
-			regex: matcher.regex,
-			topic: topic_string
-		});
-	}
-
-	listeners.push({
-		handler: handler,
-		getParams: matcher.getParams,
-		topic: topic
-	});
-
-	if (is_new)
-		this.onadd(topic_string);
-
-	return this;
 }
 
 /**
@@ -89,41 +64,7 @@ function once(topic, handler) {
  * @return {MQTTEmitter}         Returns self for use in chaining
  */
 function removeListener(topic, handler) {
-	var matcher = mqtt_regex(topic);
 
-	var topic_string = matcher.topic;
-
-	var listeners = this._listeners[topic_string];
-
-	if (!listeners)
-		return this;
-
-	var has_filtered = false;
-
-	var filtered = listeners.filter(function(listener) {
-		if (has_filtered) return true;
-
-		var current_handler = listener.handler;
-
-		var matches = (current_handler === handler) || (current_handler.handler === handler);
-
-		if (!matches) return true;
-
-		has_filtered = true;
-		return false;
-	});
-
-	this._listeners[topic_string] = filtered;
-
-	if (!filtered.length) {
-		this._listeners[topic_string] = undefined;
-		this._regexes.filter(function(regex) {
-			return (regex.topic !== topic_string);
-		})
-		this.onremove(topic_string);
-	}
-
-	return this;
 }
 
 /**
@@ -132,35 +73,7 @@ function removeListener(topic, handler) {
  * @return {MQTTEmitter}       Returns self for use in chaining
  */
 function removeAllListeners(topic) {
-	if (!topic) {
-		var all_listeners = this._listeners;
 
-		this._listeners = {};
-		this._regexes = [];
-
-		Object.keys(all_listeners).forEach(function(topic) {
-			this.onremove(topic);
-		}, this);
-
-		return this;
-	}
-
-	var matcher = mqtt_regex(topic);
-
-	var topic_string = matcher.topic;
-
-	var listeners = this._listeners[topic_string];
-
-	if (!listeners)
-		return this;
-
-	this._listeners[topic_string] = undefined;
-	this._regexes.filter(function(regex) {
-		return (regex.topic !== topic_string);
-	});
-	this.onremove(topic_string);
-
-	return this;
 }
 
 /**
@@ -169,17 +82,7 @@ function removeAllListeners(topic) {
  * @return {Array}        Array of handler functions
  */
 function listeners(topic) {
-	var matcher = mqtt_regex(topic);
 
-	var topic_string = matcher.topic;
-
-	var listeners = this._listeners[topic_string] || [];
-
-	return listeners.map(function(listener) {
-		var handler = listener.handler;
-		var sub_handler = handler.handler;
-		return sub_handler || handler;
-	});
 }
 
 /**
@@ -189,31 +92,7 @@ function listeners(topic) {
  * @return {Boolean}         Returns true if there were any listeners called for this topic
  */
 function emit(topic, payload) {
-	var _listeners = this._listeners;
-	var has_matched = false;
 
-	this._regexes.forEach(process_regex);
-
-	return has_matched;
-
-	function process_regex(regex) {
-		var matches = topic.match(regex.regex);
-		var topic_string = regex.topic;
-
-		if (!matches) return;
-
-		var listeners = _listeners[topic_string] || [];
-		if (!listeners.length) return;
-
-		has_matched = true;
-
-		listeners.forEach(handle_listener.bind(null, matches));
-	}
-
-	function handle_listener(matches, listener) {
-		var params = listener.getParams(matches);
-		listener.handler(payload, params, topic, listener.topic);
-	}
 }
 
 /**
