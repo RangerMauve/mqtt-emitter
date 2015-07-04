@@ -82,3 +82,5 @@ emitter.onremove = function (topic) {
 *Note:* Topic patterns are converted into their regular MQTT counterparts so `foo/+boar/#` is the same as `foo/+baz/#`. They both turn into `foo/+/#`
 
 *Note:* Because of the nature of this library, the `newListener` and `removeListener` events aren't supported. Use the `onadd()` and `onremove()` hooks instead.
+
+*Note:* Try to avoid topics with trailing slashes since they can lead to strange behavior.
