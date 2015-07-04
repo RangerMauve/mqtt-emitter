@@ -36,7 +36,24 @@ MQTTEmitter.prototype = Object.create({
  * @return {MQTTEmitter}         Returns self for use in chaining
  */
 function addListener(topic, handler) {
+	var matcher = mqtt_regex(topic);
+	var topic_string = matcher.topic;
+	var is_new = false;
 
+	var listeners = this._listeners.get(topic_string);
+	if (!listeners) {
+		listeners = this._listeners.set(topic_string, []);
+		is_new = true;
+	}
+
+	listeners.push({
+		fn: handler,
+		params: matcher.exec
+	});
+
+	if (is_new) this.onadd(topic_string);
+
+	return this;
 }
 
 /**
@@ -64,7 +81,29 @@ function once(topic, handler) {
  * @return {MQTTEmitter}         Returns self for use in chaining
  */
 function removeListener(topic, handler) {
+	var matcher = mqtt_regex(topic);
+	var topic_string = matcher.topic;
+	var listeners = this._listeners.get(topic_string);
 
+	if (!listeners || !listeners.length) return this;
+
+	var has_filtered = false;
+	filtered_listeners = listeners.filter(function (listener) {
+		if (has_filtered) return true;
+
+		var matches = (listener.fn === handler);
+		if (!matches) return true;
+
+		has_filtered = true;
+		return false;
+	});
+
+	if (!filtered_listeners.length) this.onremove(topic_string);
+
+	if (has_filtered)
+		this._listeners.set(topic_string, filtered_listeners);
+
+	return this;
 }
 
 /**
@@ -73,7 +112,9 @@ function removeListener(topic, handler) {
  * @return {MQTTEmitter}       Returns self for use in chaining
  */
 function removeAllListeners(topic) {
+	this._listeners = new MQTTStore();
 
+	return this;
 }
 
 /**
@@ -82,7 +123,12 @@ function removeAllListeners(topic) {
  * @return {Array}        Array of handler functions
  */
 function listeners(topic) {
+	var matcher = mqtt_regex(topic);
+	var topic_string = matcher.topic;
 
+	return (this._listeners.get(topic_string) || []).map(function (listener) {
+		return listener.fn;
+	});
 }
 
 /**
@@ -92,7 +138,19 @@ function listeners(topic) {
  * @return {Boolean}         Returns true if there were any listeners called for this topic
  */
 function emit(topic, payload) {
+	var matcher = mqtt_regex(topic);
+	var topic_string = matcher.topic;
+	var matching = this._listeners.match(topic_string);
+	if (!matching.length) return false;
 
+	matching.forEach(function (listeners) {
+		listeners.forEach(function (listener) {
+			var params = listener.params(topic);
+			listener.fn(payload, params, topic);
+		});
+	});
+
+	return true;
 }
 
 /**
