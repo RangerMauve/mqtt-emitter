@@ -63,14 +63,15 @@ function addListener(topic, handler) {
  * @return {MQTTEmitter}         Returns self for use in chaining
  */
 function once(topic, handler) {
+	var self = this;
 	once_handler.handler = handler;
 	this.on(topic, once_handler);
 
 	return this;
 
 	function once_handler(data, params) {
-		handler.call(this, data, params);
-		this.removeListener(topic, once_handler);
+		handler.call(self, data, params);
+		self.removeListener(topic, once_handler);
 	}
 }
 
