@@ -1,3 +1,4 @@
+"use strict";
 var assert = require("chai").assert;
 var noop = require("node-noop").noop;
 var MQTTEmitter = require("../");
@@ -7,7 +8,7 @@ describe("MQTTEmitter", function() {
 
 	describe("#addListener()", function() {
 		it("should be able to subscribe to a regular MQTT topic", function() {
-			emitter.addListener("foo/bar/baz", noop)
+			emitter.addListener("foo/bar/baz", noop);
 		});
 
 		it("should be able to subscribe to a MQTT topic with wildcards", function() {
@@ -42,7 +43,7 @@ describe("MQTTEmitter", function() {
 			function fn() {
 				done();
 			}
-		})
+		});
 	});
 
 	describe("#removeAllListeners", function() {
@@ -74,7 +75,7 @@ describe("MQTTEmitter", function() {
 			function fn() {
 				throw new Error("Listener was not removed");
 			}
-		})
+		});
 	});
 
 	describe("#emit()", function() {
@@ -135,6 +136,18 @@ describe("MQTTEmitter", function() {
 		});
 	});
 
+	describe("#once", function() {
+		var hasCalled = 0;
+		emitter.once("test/once/1", function() {
+			hasCalled += 1;
+		});
+
+		emitter.emit("test/once/1", "test");
+		emitter.emit("test/once/1", "test");
+
+		assert.equal(hasCalled, 1, "Callback called once");
+	});
+
 	describe("#listeners()", function() {
 		it("should return empty arrays for topics without listeners", function() {
 			var list = emitter.listeners("test/listeners/1");
@@ -147,7 +160,7 @@ describe("MQTTEmitter", function() {
 			emitter
 				.on(topic, noop)
 				.on(topic, noop)
-				.on(topic, noop)
+				.on(topic, noop);
 
 			var list = emitter.listeners(topic);
 			assert.isArray(list, "return is a list");
@@ -159,7 +172,7 @@ describe("MQTTEmitter", function() {
 			emitter
 				.on(topic, noop)
 				.on(topic, noop)
-				.on(topic, noop)
+				.on(topic, noop);
 
 			emitter.removeAllListeners(topic);
 
@@ -174,14 +187,15 @@ describe("MQTTEmitter", function() {
 			emitter.onadd = function() {
 				done();
 				emitter.onadd = noop;
-			}
+			};
+
 			emitter.on("test/add/1", noop);
 		});
 
 		it("should only be called once per topic", function(done) {
 			emitter.onadd = function() {
 				done();
-			}
+			};
 			emitter.on("test/add/2", noop);
 			emitter.on("test/add/2", noop);
 		});
@@ -190,7 +204,7 @@ describe("MQTTEmitter", function() {
 			emitter.onadd = function(topic) {
 				assert.equal(topic, "test/add/+/", "argument is topic");
 				emitter.onadd = noop;
-			}
+			};
 			emitter.on("test/add/+number", noop);
 		});
 	});
@@ -199,7 +213,7 @@ describe("MQTTEmitter", function() {
 		it("should be called when all listeners are removed", function(done) {
 			emitter.onremove = function() {
 				done();
-			}
+			};
 			emitter
 				.on("test/remove/1", noop)
 				.removeListener("test/remove/1", noop);
