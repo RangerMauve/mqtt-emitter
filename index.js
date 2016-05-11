@@ -1,3 +1,4 @@
+"use strict";
 /*
  mqtt-emitter by RangerMauve. Version 0.0.2
 */
@@ -89,7 +90,7 @@ function removeListener(topic, handler) {
 	if (!listeners || !listeners.length) return this;
 
 	var has_filtered = false;
-	filtered_listeners = listeners.filter(function (listener) {
+	var filtered_listeners = listeners.filter(function (listener) {
 		if (has_filtered) return true;
 
 		var matches = (listener.fn === handler);
@@ -113,7 +114,19 @@ function removeListener(topic, handler) {
  * @return {MQTTEmitter}       Returns self for use in chaining
  */
 function removeAllListeners(topic) {
-	this._listeners = new MQTTStore();
+	if (topic) {
+		var matcher = mqtt_regex(topic);
+		var topic_string = matcher.topic;
+		var listeners = this._listeners.get(topic_string);
+
+		if (!listeners.length) return this;
+
+		this._listeners.set(topic_string, []);
+		this.onremove(topic_string);
+
+	} else {
+		this._listeners = new MQTTStore();
+	}
 
 	return this;
 }
