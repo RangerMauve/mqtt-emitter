@@ -49,7 +49,8 @@ function addListener(topic, handler) {
 
 	listeners.push({
 		fn: handler,
-		params: matcher.exec
+		params: matcher.exec,
+		pattern: topic
 	});
 
 	if (is_new) this.onadd(topic_string);
@@ -160,7 +161,7 @@ function emit(topic, payload) {
 	matching.forEach(function (listeners) {
 		listeners.forEach(function (listener) {
 			var params = listener.params(topic);
-			listener.fn(payload, params, topic);
+			listener.fn(payload, params, topic, listener.pattern);
 		});
 	});
 
