@@ -230,6 +230,15 @@ test("MQTTEmitter#onadd(): should be called with the topic string", function (t)
 	emitter.on("test/add/+number", noop);
 });
 
+test("MQTTEmitter#onadd(): should be called again if a topic was previously removed", function (t) {
+	var emitter = new MQTTEmitter();
+	emitter.on("test/add/4", noop).removeListener("test/add/4", noop);
+	emitter.onadd = function () {
+		t.end();
+	};
+	emitter.on("test/add/4", noop);
+});
+
 test("MQTTEmitter#onremove(): should be called when all listeners are removed", function (t) {
 	var emitter = new MQTTEmitter();
 	emitter.onremove = function () {

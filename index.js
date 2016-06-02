@@ -39,13 +39,13 @@ MQTTEmitter.prototype = Object.create({
 function addListener(topic, handler) {
 	var matcher = mqtt_regex(topic);
 	var topic_string = matcher.topic;
-	var is_new = false;
 
 	var listeners = this._listeners.get(topic_string);
 	if (!listeners) {
 		listeners = this._listeners.set(topic_string, []);
-		is_new = true;
 	}
+
+	var is_new = (listeners.length === 0);
 
 	listeners.push({
 		fn: handler,
