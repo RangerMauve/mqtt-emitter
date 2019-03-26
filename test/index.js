@@ -68,16 +68,16 @@ test('MQTTEmitter#removeAllListeners:should remove all listeners for single topi
 
 test('MQTTEmitter#removeAllListeners:should remove all listeners when no topic is specified', function (t) {
   var emitter = new MQTTEmitter()
-  var topic_prefix = 'test/remove/all'
+  var topicPrefix = 'test/remove/all'
   emitter
-    .on(topic_prefix + '1', fn)
-    .on(topic_prefix + '2', fn)
-    .on(topic_prefix + '3', fn)
+    .on(topicPrefix + '1', fn)
+    .on(topicPrefix + '2', fn)
+    .on(topicPrefix + '3', fn)
     .removeAllListeners()
 
-  emitter.emit(topic_prefix + '1', 'test')
-  emitter.emit(topic_prefix + '2', 'test')
-  emitter.emit(topic_prefix + '3', 'test')
+  emitter.emit(topicPrefix + '1', 'test')
+  emitter.emit(topicPrefix + '2', 'test')
+  emitter.emit(topicPrefix + '3', 'test')
 
   t.end()
 

@@ -38,11 +38,11 @@ MQTTEmitter.prototype = Object.create({
  */
 function addListener (topic, handler) {
   var matcher = mqtt_regex(topic)
-  var topic_string = matcher.topic
+  var topicString = matcher.topic
 
-  var listeners = this._listeners.get(topic_string)
+  var listeners = this._listeners.get(topicString)
   if (!listeners) {
-    listeners = this._listeners.set(topic_string, [])
+    listeners = this._listeners.set(topicString, [])
   }
 
   var is_new = (listeners.length === 0)
@@ -53,7 +53,7 @@ function addListener (topic, handler) {
     pattern: topic
   })
 
-  if (is_new) this.onadd(topic_string)
+  if (is_new) this.onadd(topicString)
 
   return this
 }
@@ -85,25 +85,25 @@ function once (topic, handler) {
  */
 function removeListener (topic, handler) {
   var matcher = mqtt_regex(topic)
-  var topic_string = matcher.topic
-  var listeners = this._listeners.get(topic_string)
+  var topicString = matcher.topic
+  var listeners = this._listeners.get(topicString)
 
   if (!listeners || !listeners.length) return this
 
-  var has_filtered = false
+  var hasFiltered = false
   var filtered_listeners = listeners.filter(function (listener) {
-    if (has_filtered) return true
+    if (hasFiltered) return true
 
     var matches = (listener.fn === handler)
     if (!matches) return true
 
-    has_filtered = true
+    hasFiltered = true
     return false
   })
 
-  if (!filtered_listeners.length) this.onremove(topic_string)
+  if (!filtered_listeners.length) this.onremove(topicString)
 
-  if (has_filtered) { this._listeners.set(topic_string, filtered_listeners) }
+  if (hasFiltered) { this._listeners.set(topicString, filtered_listeners) }
 
   return this
 }
@@ -116,13 +116,13 @@ function removeListener (topic, handler) {
 function removeAllListeners (topic) {
   if (topic) {
     var matcher = mqtt_regex(topic)
-    var topic_string = matcher.topic
-    var listeners = this._listeners.get(topic_string)
+    var topicString = matcher.topic
+    var listeners = this._listeners.get(topicString)
 
     if (!listeners.length) return this
 
-    this._listeners.set(topic_string, [])
-    this.onremove(topic_string)
+    this._listeners.set(topicString, [])
+    this.onremove(topicString)
   } else {
     this._listeners = new MQTTStore()
   }
@@ -137,9 +137,9 @@ function removeAllListeners (topic) {
  */
 function listeners (topic) {
   var matcher = mqtt_regex(topic)
-  var topic_string = matcher.topic
+  var topicString = matcher.topic
 
-  return (this._listeners.get(topic_string) || []).map(function (listener) {
+  return (this._listeners.get(topicString) || []).map(function (listener) {
     return listener.fn
   })
 }
@@ -152,8 +152,8 @@ function listeners (topic) {
  */
 function emit (topic, payload) {
   var matcher = mqtt_regex(topic)
-  var topic_string = matcher.topic
-  var matching = this._listeners.match(topic_string)
+  var topicString = matcher.topic
+  var matching = this._listeners.match(topicString)
   if (!matching.length) return false
 
   matching.forEach(function (listeners) {
