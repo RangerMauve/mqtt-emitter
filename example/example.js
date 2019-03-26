@@ -8,22 +8,22 @@ var names = ['Bob', 'Angelina', 'xX420xNoSc0peXx']
 var count = 10
 var delay = 200
 
-events.on(topic, handle_message)
-say_something()
+events.on(topic, handleMessage)
+saySomething()
 
-function handle_message (data, params, topic, topic_pattern) {
+function handleMessage (data, params, topic, topicPattern) {
   var name = params.name
   var path = params.path
   console.log(name, '@', '/' + path.join('/'), ':', data)
 }
 
-function say_something () {
-  var event = 'user/' + random_from_list(names) + '/message/lobby'
-  events.emit(event, random_from_list(messages))
-  if (count--) setTimeout(say_something, delay)
-  else events.removeListener(topic, handle_message)
+function saySomething () {
+  var event = 'user/' + randomFromList(names) + '/message/lobby'
+  events.emit(event, randomFromList(messages))
+  if (count--) setTimeout(saySomething, delay)
+  else events.removeListener(topic, handleMessage)
 }
 
-function random_from_list (list) {
+function randomFromList (list) {
   return list[Math.floor(Math.random() * list.length)]
 }
