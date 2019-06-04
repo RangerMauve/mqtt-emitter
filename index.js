@@ -120,6 +120,14 @@ function removeAllListeners (topic) {
     this._listeners.set(topicString, [])
     this.onremove(topicString)
   } else {
+    var topicStrings = this._listeners.query('#').map(function (listeners) {
+      return MQTTPattern.clean(listeners[0].pattern)
+    })
+
+    for(var i in topicStrings) {
+      this.onremove(topicStrings[i])
+    }
+
     this._listeners = new MQTTStore()
   }
 

@@ -248,3 +248,22 @@ test('MQTTEmitter#onremove(): should be called when all listeners are removed', 
     .on('test/remove/1', noop)
     .removeListener('test/remove/1', noop)
 })
+
+test('MQTTEmitter#onremove(): should be called when all listeners are removed at once', function (t) {
+  t.plan(1)
+  var emitter = new MQTTEmitter()
+  var removedTopics = []
+  emitter.onremove = function (topic) {
+    removedTopics.push(topic)
+  }
+
+  emitter
+    .on('test/remove/1', noop)
+    .on('test/remove/1', noop)
+    .on('test/remove/2', noop)
+    .on('test/remove/+id/test', noop)
+    .on('test/#', noop)
+    .removeAllListeners()
+
+  t.deepEqual(removedTopics, ['test/remove/1', 'test/remove/2', 'test/remove/+/test', 'test/#'])
+})
