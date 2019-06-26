@@ -10,6 +10,12 @@ test('MQTTEmitter#addListener(): should be able to subscribe to a regular MQTT t
   t.end()
 })
 
+test('MQTTEmitter#addListener(): should be able to subscribe to a regular MQTT topic with options', function (t) {
+  var emitter = new MQTTEmitter()
+  emitter.addListener('foo/bar/baz', {qos: 0}, noop)
+  t.end()
+})
+
 test('MQTTEmitter#addListener(): should be able to subscribe to a MQTT topic with wildcards', function (t) {
   var emitter = new MQTTEmitter()
   emitter.addListener('foo/+/#', noop)
