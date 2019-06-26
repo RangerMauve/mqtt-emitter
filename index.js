@@ -11,7 +11,7 @@ module.exports = MQTTEmitter
 /**
  * Creates a new MQTTEmitter instance
  */
-function MQTTEmitter () {
+function MQTTEmitter() {
   this._listeners = new MQTTStore()
   this._regexes = []
 }
@@ -33,10 +33,16 @@ MQTTEmitter.prototype = Object.create({
  * Listen for MQTT messages that match a given pattern.
  * @see {@link https://github.com/RangerMauve/mqtt-regex|mqtt-regex}
  * @param  {String}      topic   MQTT topic pattern with optional placeholders
+ * @param {Object}  options    optional MQTT subscribe options
  * @param  {Function}    handler Callback which takes the MQTT payload and topic params
  * @return {MQTTEmitter}         Returns self for use in chaining
  */
-function addListener (topic, handler) {
+function addListener(topic, options, handler) {
+  if(typeof options === 'function'){
+    handler = options;
+    options = {};
+  }
+
   var topicString = MQTTPattern.clean(topic)
 
   var listeners = this._listeners.get(topicString)
@@ -48,10 +54,11 @@ function addListener (topic, handler) {
 
   listeners.push({
     fn: handler,
-    pattern: topic
+    pattern: topic,
+    options: options,
   })
 
-  if (isNew) this.onadd(topicString)
+  if (isNew) this.onadd(topicString, options)
 
   return this
 }
@@ -62,14 +69,14 @@ function addListener (topic, handler) {
  * @param  {Function}    handler Function to call the next time this topic appears
  * @return {MQTTEmitter}         Returns self for use in chaining
  */
-function once (topic, handler) {
+function once(topic, handler) {
   var self = this
   onceHandler.handler = handler
   this.on(topic, onceHandler)
 
   return this
 
-  function onceHandler (data, params) {
+  function onceHandler(data, params) {
     handler.call(self, data, params)
     self.removeListener(topic, onceHandler)
   }
@@ -81,7 +88,7 @@ function once (topic, handler) {
  * @param  {Function}    handler Handler that was used originally
  * @return {MQTTEmitter}         Returns self for use in chaining
  */
-function removeListener (topic, handler) {
+function removeListener(topic, handler) {
   var topicString = MQTTPattern.clean(topic)
   var listeners = this._listeners.get(topicString)
 
@@ -100,7 +107,9 @@ function removeListener (topic, handler) {
 
   if (!filteredListeners.length) this.onremove(topicString)
 
-  if (hasFiltered) { this._listeners.set(topicString, filteredListeners) }
+  if (hasFiltered) {
+    this._listeners.set(topicString, filteredListeners)
+  }
 
   return this
 }
@@ -110,7 +119,7 @@ function removeListener (topic, handler) {
  * @param  {String}      topic Topic pattern to unsubscribe from
  * @return {MQTTEmitter}       Returns self for use in chaining
  */
-function removeAllListeners (topic) {
+function removeAllListeners(topic) {
   if (topic) {
     var topicString = MQTTPattern.clean(topic)
     var listeners = this._listeners.get(topicString)
@@ -124,7 +133,7 @@ function removeAllListeners (topic) {
       return MQTTPattern.clean(listeners[0].pattern)
     })
 
-    for(var i in topicStrings) {
+    for (var i in topicStrings) {
       this.onremove(topicStrings[i])
     }
 
@@ -139,7 +148,7 @@ function removeAllListeners (topic) {
  * @param  {String} topic The topic pattern to get listeners for
  * @return {Array}        Array of handler functions
  */
-function listeners (topic) {
+function listeners(topic) {
   var topicString = MQTTPattern.clean(topic)
 
   return (this._listeners.get(topicString) || []).map(function (listener) {
@@ -153,14 +162,14 @@ function listeners (topic) {
  * @param  {Any}     payload This is the payload from the MQTT topic event
  * @return {Boolean}         Returns true if there were any listeners called for this topic
  */
-function emit (topic, payload) {
+function emit(topic, payload) {
   var topicString = MQTTPattern.clean(topic)
   var matching = this._listeners.match(topicString)
   if (!matching.length) return false
 
   matching.forEach(function (listeners) {
     listeners.forEach(function (listener) {
-			var pattern = listener.pattern
+      var pattern = listener.pattern
       var params = MQTTPattern.exec(pattern, topic)
       listener.fn(payload, params, topic, listener.pattern)
     })
@@ -172,8 +181,9 @@ function emit (topic, payload) {
 /**
  * Hook for reacting to new MQTT topics
  * @param {String} topic MQTT topic that is being subscribed to
+ * @param options options MQTT subscription options
  */
-function onadd (topic) {
+function onadd(topic, options = {}) {
   // Detect when new topics are added, maybe
   // Can be useful for auto-subscribing on actual MQTT connection
 }
@@ -182,7 +192,7 @@ function onadd (topic) {
  * Hook for reacting to removed MQTT topics
  * @param  {String} topic MQTT topiuc that is being unsubscribed from
  */
-function onremove (topic) {
+function onremove(topic) {
   // Detect when topics are no longer listened to here
   // Can be useful for auto-unsubscribing on an actual MQTT connection
 }
