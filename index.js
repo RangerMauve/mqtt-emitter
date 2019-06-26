@@ -11,7 +11,7 @@ module.exports = MQTTEmitter
 /**
  * Creates a new MQTTEmitter instance
  */
-function MQTTEmitter() {
+function MQTTEmitter () {
   this._listeners = new MQTTStore()
   this._regexes = []
 }
@@ -37,10 +37,10 @@ MQTTEmitter.prototype = Object.create({
  * @param  {Function}    handler Callback which takes the MQTT payload and topic params
  * @return {MQTTEmitter}         Returns self for use in chaining
  */
-function addListener(topic, options, handler) {
-  if(typeof options === 'function'){
-    handler = options;
-    options = {};
+function addListener (topic, options, handler) {
+  if (typeof options === 'function') {
+    handler = options
+    options = {}
   }
 
   var topicString = MQTTPattern.clean(topic)
@@ -55,7 +55,7 @@ function addListener(topic, options, handler) {
   listeners.push({
     fn: handler,
     pattern: topic,
-    options: options,
+    options: options
   })
 
   if (isNew) this.onadd(topicString, options)
@@ -69,14 +69,14 @@ function addListener(topic, options, handler) {
  * @param  {Function}    handler Function to call the next time this topic appears
  * @return {MQTTEmitter}         Returns self for use in chaining
  */
-function once(topic, handler) {
+function once (topic, handler) {
   var self = this
   onceHandler.handler = handler
   this.on(topic, onceHandler)
 
   return this
 
-  function onceHandler(data, params) {
+  function onceHandler (data, params) {
     handler.call(self, data, params)
     self.removeListener(topic, onceHandler)
   }
@@ -88,7 +88,7 @@ function once(topic, handler) {
  * @param  {Function}    handler Handler that was used originally
  * @return {MQTTEmitter}         Returns self for use in chaining
  */
-function removeListener(topic, handler) {
+function removeListener (topic, handler) {
   var topicString = MQTTPattern.clean(topic)
   var listeners = this._listeners.get(topicString)
 
@@ -119,7 +119,7 @@ function removeListener(topic, handler) {
  * @param  {String}      topic Topic pattern to unsubscribe from
  * @return {MQTTEmitter}       Returns self for use in chaining
  */
-function removeAllListeners(topic) {
+function removeAllListeners (topic) {
   if (topic) {
     var topicString = MQTTPattern.clean(topic)
     var listeners = this._listeners.get(topicString)
@@ -148,7 +148,7 @@ function removeAllListeners(topic) {
  * @param  {String} topic The topic pattern to get listeners for
  * @return {Array}        Array of handler functions
  */
-function listeners(topic) {
+function listeners (topic) {
   var topicString = MQTTPattern.clean(topic)
 
   return (this._listeners.get(topicString) || []).map(function (listener) {
@@ -162,7 +162,7 @@ function listeners(topic) {
  * @param  {Any}     payload This is the payload from the MQTT topic event
  * @return {Boolean}         Returns true if there were any listeners called for this topic
  */
-function emit(topic, payload) {
+function emit (topic, payload) {
   var topicString = MQTTPattern.clean(topic)
   var matching = this._listeners.match(topicString)
   if (!matching.length) return false
@@ -183,7 +183,7 @@ function emit(topic, payload) {
  * @param {String} topic MQTT topic that is being subscribed to
  * @param options options MQTT subscription options
  */
-function onadd(topic, options = {}) {
+function onadd (topic, options = {}) {
   // Detect when new topics are added, maybe
   // Can be useful for auto-subscribing on actual MQTT connection
 }
@@ -192,7 +192,7 @@ function onadd(topic, options = {}) {
  * Hook for reacting to removed MQTT topics
  * @param  {String} topic MQTT topiuc that is being unsubscribed from
  */
-function onremove(topic) {
+function onremove (topic) {
   // Detect when topics are no longer listened to here
   // Can be useful for auto-unsubscribing on an actual MQTT connection
 }
