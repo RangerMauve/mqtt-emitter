@@ -92,6 +92,27 @@ test('MQTTEmitter#removeAllListeners:should remove all listeners when no topic i
   }
 })
 
+test('MQTTEmitter#removeAllListeners:should remove all listeners even if there are already no more listeners', function (t) {
+  var emitter = new MQTTEmitter()
+  var topicPrefix = 'test/remove/all'
+  emitter
+    .on(topicPrefix + '1', fn)
+    .on(topicPrefix + '2', fn)
+    .on(topicPrefix + '3', fn)
+    .removeListener(topicPrefix + '1', fn)
+    .removeAllListeners()
+
+  emitter.emit(topicPrefix + '1', 'test')
+  emitter.emit(topicPrefix + '2', 'test')
+  emitter.emit(topicPrefix + '3', 'test')
+
+  t.end()
+
+  function fn () {
+    t.end(new Error('Listener was not removed'))
+  }
+})
+
 test('MQTTEmitter#emit(): should call listeners', function (t) {
   var emitter = new MQTTEmitter()
   emitter.on('test/emit/1', function () {

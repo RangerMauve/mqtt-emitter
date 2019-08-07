@@ -129,7 +129,9 @@ function removeAllListeners (topic) {
     this._listeners.set(topicString, [])
     this.onremove(topicString)
   } else {
-    var topicStrings = this._listeners.query('#').map(function (listeners) {
+    var topicStrings = this._listeners.query('#').filter(function (listeners) {
+        return listeners && listeners.length > 0
+      }).map(function (listeners) {
       return MQTTPattern.clean(listeners[0].pattern)
     })
 
