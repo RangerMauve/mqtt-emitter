@@ -182,6 +182,16 @@ test('MQTTEmitter#emit(): should supply original topic pattern as fourth argumen
   emitter.emit('test/emit/4')
 })
 
+test('MQTTEmitter#emit(): should support array method as topic part (issue #11)', function (t) {
+  t.plan(1)
+  var emitter = new MQTTEmitter()
+  emitter.removeAllListeners()
+  emitter.on('test/emit/+middle/+end', function (payload, params, topic, pattern) {
+    t.equal(pattern, 'test/emit/+middle/+end', 'fourth argument is the pattern')
+  })
+  emitter.emit('test/emit/shift/join')
+})
+
 test('MQTTEmitter#once:should only invoke callback once', function (t) {
   t.plan(1)
   var emitter = new MQTTEmitter()

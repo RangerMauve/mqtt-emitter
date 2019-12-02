@@ -29,6 +29,13 @@ MQTTEmitter.prototype = Object.create({
   onremove: onremove
 })
 
+// convenience method to retrieve the set of listeners bound to a topicString from store
+function get (store, topicString) {
+  var res = store.get(topicString)
+  if (res !== MQTTStore.NO_RESULT) return res.value
+  else return undefined
+}
+
 /**
  * Listen for MQTT messages that match a given pattern.
  * @see {@link https://github.com/RangerMauve/mqtt-regex|mqtt-regex}
@@ -45,9 +52,9 @@ function addListener (topic, options, handler) {
 
   var topicString = MQTTPattern.clean(topic)
 
-  var listeners = this._listeners.get(topicString)
+  var listeners = get(this._listeners, topicString)
   if (!listeners) {
-    listeners = this._listeners.set(topicString, [])
+    listeners = this._listeners.put(topicString, []).value
   }
 
   var isNew = (listeners.length === 0)
@@ -90,7 +97,7 @@ function once (topic, handler) {
  */
 function removeListener (topic, handler) {
   var topicString = MQTTPattern.clean(topic)
-  var listeners = this._listeners.get(topicString)
+  var listeners = get(this._listeners, topicString)
 
   if (!listeners || !listeners.length) return this
 
@@ -108,7 +115,7 @@ function removeListener (topic, handler) {
   if (!filteredListeners.length) this.onremove(topicString)
 
   if (hasFiltered) {
-    this._listeners.set(topicString, filteredListeners)
+    this._listeners.put(topicString, filteredListeners)
   }
 
   return this
@@ -122,20 +129,21 @@ function removeListener (topic, handler) {
 function removeAllListeners (topic) {
   if (topic) {
     var topicString = MQTTPattern.clean(topic)
-    var listeners = this._listeners.get(topicString)
+    var listeners = get(this._listeners, topicString)
 
     if (!listeners.length) return this
 
-    this._listeners.set(topicString, [])
+    this._listeners.put(topicString, [])
     this.onremove(topicString)
   } else {
-    var topicStrings = this._listeners.query('#').filter(function (listeners) {
+    var topicStrings = this._listeners.findMatching('#').filter(function ({ value: listeners }) {
         return listeners && listeners.length > 0
-      }).map(function (listeners) {
-      return MQTTPattern.clean(listeners[0].pattern)
+      }).map(function ({ key }) {
+      return MQTTPattern.clean(key)
     })
 
-    for (var i in topicStrings) {
+    // reversing the topicStrings to keep the original order of mqtt-store version 1.0.4 with 2.1.0
+    for (var i in topicStrings.reverse()) {
       this.onremove(topicStrings[i])
     }
 
@@ -153,7 +161,7 @@ function removeAllListeners (topic) {
 function listeners (topic) {
   var topicString = MQTTPattern.clean(topic)
 
-  return (this._listeners.get(topicString) || []).map(function (listener) {
+  return (get(this._listeners, topicString) || []).map(function (listener) {
     return listener.fn
   })
 }
@@ -166,10 +174,10 @@ function listeners (topic) {
  */
 function emit (topic, payload) {
   var topicString = MQTTPattern.clean(topic)
-  var matching = this._listeners.match(topicString)
+  var matching = this._listeners.findPatterns(topicString)
   if (!matching.length) return false
 
-  matching.forEach(function (listeners) {
+  matching.forEach(function ({ value: listeners }) {
     listeners.forEach(function (listener) {
       var pattern = listener.pattern
       var params = MQTTPattern.exec(pattern, topic)
