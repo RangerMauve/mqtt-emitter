@@ -72,10 +72,10 @@ There are also hooks that you can listen for new and removed topic listeners.
 ``` javascript
 // Override the default behavior with a custom callback for subscribing to topics
 emitter.onadd = function (topic) {
-	mqtt.subscribe("topic");
+	mqtt.subscribe(topic);
 }
 emitter.onremove = function (topic) {
-	mqtt.unsubscribe("topic");
+	mqtt.unsubscribe(topic);
 }
 ```
 
